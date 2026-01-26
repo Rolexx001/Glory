@@ -1,50 +1,73 @@
 <%- include('./partials/header') %>
-    <div class="w-full h-screen flex items-start px-20 py-20">
-        <div class="w-[25%] flex h-screen flex-col items-start">
-            <div class="flex items-center gap-2">
-                <h3>sort by</h3>
-                <form action="/shop">
-                    <select class="border-[1px] px-2 py-1" name="sortby" id="">
-                        <option value="popular">Popular</option>
-                        <option value="newest">Newest</option>
-                    </select>
-                </form>
-            </div>
-            <div class="flex flex-col mt-20">
-                <a class="block w-fit mb-2" href="">New Collection</a>
-                <a class="block w-fit mb-2" href="">All Products</a>
-                <a class="block w-fit mb-2" href="">Discounted Products</a>
-            </div>
-            <div class="mt-32">
-                <a class="block w-fit mb-2" href="">Filter by :</a>
-                <a class="block w-fit mb-2" href="">Availability</a>
-                <a class="block w-fit mb-2" href="">Discount</a>
-            </div>
+
+<% if(success && success.length > 0){ %>
+    <div class="fixed top-10 left-1/2 -translate-x-1/2 z-[999] px-5 py-3 rounded-full bg-black text-white text-sm font-medium shadow-2xl animate-bounce">
+        <%= success %>
+    </div>
+<% } %>
+
+<div class="w-full min-h-screen bg-white flex px-10 md:px-20 py-10 gap-10">
+    
+    <div class="w-[20%] hidden md:flex flex-col">
+        <div class="mb-10">
+            <h3 class="text-sm uppercase tracking-widest text-zinc-400 font-bold mb-5">Sort By</h3>
+            <form action="/shop" id="sortForm">
+                <select onchange="this.form.submit()" class="w-full border-b-2 border-zinc-100 py-2 focus:outline-none focus:border-black transition-colors cursor-pointer" name="sortby">
+                    <option value="popular">Popular</option>
+                    <option value="newest">Newest</option>
+                </select>
+            </form>
         </div>
-        <div class="w-[75%] flex flex-col gap-5 h-screen">
-            <div class="flex items-start gap-5">
-                <% products.forEach(function(product){ %>
-                    <div class="w-60">
-                        <div class="w-full h-52 flex items-center justify-center bg-[<%= product.bgcolor %>]">
-                            <img class="h-[12rem]" src="data:image/jpeg;base64,<%= product.image.toString('base64') %>"
-                                alt="">
-                        </div>
-                        <div
-                            class="flex justify-between bg-[<%= product.panelcolor %>] items-center px-4 py-4 text-[<%= product.textcolor %>]">
-                            <div>
-                                <h3>
-                                    <%= product.name %>
-                                </h3>
-                                <h4>₹ <%= product.price %>
-                                </h4>
-                            </div>
-                            <a class="w-7 h-7 flex items-center justify-center rounded-full bg-white" href="">
-                                <i class="ri-add-line"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <% }) %>
-            </div>
+
+        <div class="space-y-3">
+            <h3 class="text-sm uppercase tracking-widest text-zinc-400 font-bold mb-5">Collection</h3>
+            <a class="block text-zinc-800 hover:translate-x-2 transition-transform duration-300 font-medium" href="#">New Collection</a>
+            <a class="block text-zinc-800 hover:translate-x-2 transition-transform duration-300 font-medium" href="#">All Products</a>
+            <a class="block text-zinc-800 hover:translate-x-2 transition-transform duration-300 font-medium" href="#">Limited Edition</a>
+        </div>
+
+        <div class="mt-20 space-y-3">
+            <h3 class="text-sm uppercase tracking-widest text-zinc-400 font-bold mb-5">Filters</h3>
+            <a class="block text-zinc-500 hover:text-black transition-colors" href="#">Availability</a>
+            <a class="block text-zinc-500 hover:text-black transition-colors" href="#">Price Range</a>
+            <a class="block text-zinc-500 hover:text-black transition-colors" href="#">Discount</a>
         </div>
     </div>
-    <%- include('./partials/footer') %>
+
+    <div class="w-full md:w-[80%]">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+            <% products.forEach(function(product){ %>
+                <div class="group relative flex flex-col cursor-pointer">
+                    <div style="background-color: <%= product.bgcolor %>;" 
+                         class="relative w-full aspect-[4/5] flex items-center justify-center rounded-3xl overflow-hidden transition-all duration-500 group-hover:shadow-xl">
+                        
+                        <img class="h-64 object-contain transition-transform duration-700 group-hover:scale-110 drop-shadow-2xl" 
+                             src="data:image/jpeg;base64,<%= product.image.toString('base64') %>"
+                             alt="<%= product.name %>">
+                        
+                        <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-8">
+                             <a href="/addtocart/<%= product._id %>" class="bg-white text-black px-6 py-3 rounded-full font-bold text-xs uppercase tracking-widest shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-black hover:text-white">
+                                Add to Bag
+                             </a>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-between items-start px-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-zinc-900 tracking-tight"><%= product.name %></h3>
+                            <p class="text-zinc-400 text-sm mt-1 font-medium italic">Available Colors</p>
+                        </div>
+                        <div class="flex flex-col items-end">
+                            <span class="text-lg font-black text-zinc-900">₹ <%= product.price %></span>
+                            <% if(product.discount > 0) { %>
+                                <span class="text-xs text-green-600 font-bold">-₹<%= product.discount %> OFF</span>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+</div>
+
+<%- include('./partials/footer') %>

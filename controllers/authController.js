@@ -2,6 +2,7 @@ const userModel=require("../models/user-model");
 const bcrypt=require("bcrypt");
 const jwt=require("jsonwebtoken");
 const {generateToken}=require("../utils/generateToken");
+const productModel=require("../models/product-model");
 
 module.exports.registerdUser= async function(req,res){
     try{
@@ -26,7 +27,16 @@ module.exports.registerdUser= async function(req,res){
                         fullname,
                     });
                     let token=generateToken(user);
-                    res.cookie("token",token);
+                    res.cookie("token",token,{
+                        httpOnly:true,
+                        sameSite:"lax"
+                    });
+                    req.session.user={
+                        id:user._id,
+                        email:user.email,
+                    }
+
+
                     res.redirect("/shop");
 
 
@@ -49,16 +59,24 @@ module.exports.loginUser=async function(req,res){
 
         let user=await userModel.findOne({email});
         if(!user){
-            return res.status(401).send("Email or Password is incorrect");
+            req.flash("error", "Please sign up");
+            return res.redirect("/");
         }
         bcrypt.compare(password,user.password,function(err,result){
             if(result){
                 let token=generateToken(user);
-                res.cookie("token",token);
+                res.cookie("token",token,{
+                    httpOnly:true,
+                    sameSite:"lax"
+                });
+                req.session.user={
+                    id:user._id,
+                    email:user.email,
+                }
                 res.redirect("/shop");
             }
             else{
-                res.flash("error","Email or Password is incorrect");
+                req.flash("error","Email or Password is incorrect");
                 res.redirect("/");
             }
         });
@@ -66,4 +84,11 @@ module.exports.loginUser=async function(req,res){
     catch(err){
         res.send(err.message);
     }
+};
+
+module.exports.logoutUser=function(req,res){
+    req.session.destroy(()=>{
+        res.clearCookie("token");
+        res.redirect("/");
+    });
 };
